@@ -1,0 +1,75 @@
+#CategorizeEmojisTool {
+  width: 100%;
+  height: 100%;
+}
+
+#CategorizeEmojisTool #control-panel {
+  height: calc(100% - 20px);
+  width: 350px;
+  padding: 10px;
+  border-right: 1px solid white;
+  text-align: left;
+}
+
+#CategorizeEmojisTool #buttons-group {
+  width: 100%;
+  padding-bottom: 10px;
+  border-top: 1px solid white;
+  border-bottom: 1px solid white;
+  margin: 10px 0px;
+}
+
+#CategorizeEmojisTool button {
+  width: 100%;
+  height: 40px;
+  margin-top: 10px;
+  background-color: #333842;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+#CategorizeEmojisTool button:hover {
+  background-color: #3c424f;
+}
+
+#CategorizeEmojisTool input {
+  background-color: #282c34;
+  border:1px solid #282c34;
+  color: white;
+  padding: 5px 10px;
+}
+
+
+#CategorizeEmojisTool #control-panel #groups-container {
+  width: 100%;
+}
+
+#CategorizeEmojisTool #control-panel #groups-container .group {
+  width: calc(100% - 40px);
+  margin: 10px 0px;
+  padding: 10px 20px;
+  background-color: #333842;
+  border-radius: 3px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#CategorizeEmojisTool #control-panel #groups-container .group:hover {
+  background-color: #3c424f;
+  cursor: pointer;
+}
+
+
+#CategorizeEmojisTool #control-panel #groups-container .group.selected {
+  background-color: #545c6d;
+}
+
+
+
+#CategorizeEmojisTool #emojis-container {
+  display: flex;
+  flex-wrap: wrap;
+}
