@@ -185,13 +185,15 @@ class CategorizeEmojisTool extends React.Component {
   // Render --------------------------------------------------------------------
 
   renderAllEmojis = () => {
+    let missingEmojis = [];
     let emojisToRender = [];
     let indexOfSelectedGroup = this.getIndexOfSelectedGroup();
     for (let emojiId in EMOJIS) {
       let emojiObj = EMOJIS[emojiId]['default'];
+      let numEmojiVersions = Object.keys(EMOJIS[emojiId]).length
       if (emojiObj !== undefined && 'emoji' in emojiObj) {
         let emojiText = emoji(`${emojiObj['emoji']}`);
-        // let emojiText = '.'; <- for placeholder during development
+        // emojiText = '.'; // <- for placeholder during development
         let containerCSS = 'emoji-box';
         if (emojiId in this.state.usedEmojiIds ) {
           if (this.state.usedEmojiIds[emojiId] === indexOfSelectedGroup) {
@@ -206,12 +208,16 @@ class CategorizeEmojisTool extends React.Component {
         }
 
         emojisToRender.push(
-          <div className={containerCSS} onClick={() => this.onClick_selectEmoji(emojiId)}>
+          <div className={containerCSS} onClick={() => this.onClick_selectEmoji(emojiId)} title={emojiId}>
             <p className="emoji">{emojiText}</p>
+            <p className="num-versions-label">{numEmojiVersions}</p>
           </div>
         );
+      } else {
+        missingEmojis.push(emojiId);
       }
     }
+    //console.log(`missing: ${missingEmojis}`)
     return emojisToRender;
   }
 

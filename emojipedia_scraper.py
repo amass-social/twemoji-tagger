@@ -19,8 +19,12 @@ import requests
 
 # Constants --------------------------------------------------------------------
 
-# link: https://regex101.com/r/7Qpivk/1
-LISTING_PATTERN    = r'<li class="lazyparent">\s<a href="(.+)">\s<img class=.lazyload\s.\s.+alt="(.+)" title.+height="72">'
+# regex
+LISTING_PATTERN1   = r'<li>\s<a href="(.+)">\s<img src=.+title="(.+)" width="72"'
+LISTING_PATTERN2   = r'<li class="lazyparent">\s<a href="(.+)">\s<img class="lazyload lazypreload" src=.+title="(.+)" width="72"'
+LISTING_PATTERN3   = r'<li class="lazyparent">\s<a href="(.+)">\s<img class=.lazyload\s.\s.+alt="(.+)" title.+height="72">'
+LISTING_PATTERNS   = [LISTING_PATTERN1, LISTING_PATTERN2, LISTING_PATTERN3]
+
 EMOJI_PATTERN      = r'<span class="copy-paste__label">Copy and paste this emoji:<\/span>\s<input type="text" value="(.+)" readonly'
 SHORTCODES_PATTERN = r'<span class="shortcode">:(.+):</span>'
 UNICODE_PATTERN    = r'<h2>Codepoints<\/h2>\s<ul>\s<li><a href=".+">.+\s(U\+.+)<\/a><\/li>\s<li>.+(U\+.+)<\/a>'
@@ -28,6 +32,16 @@ UNICODE_PATTERN    = r'<h2>Codepoints<\/h2>\s<ul>\s<li><a href=".+">.+\s(U\+.+)<
 BASE_URL = 'https://emojipedia.org/twitter/'
 
 # Main -------------------------------------------------------------------------
+
+
+def test():
+    with open('./emojipedia.html', 'r') as file:
+        html = file.read()
+
+    for match in re.finditer(LISTING_PATTERN3, html):
+        groups = match.groups()
+        print(groups[1])
+    sys.exit()
 
 
 def main():
@@ -40,9 +54,10 @@ def main():
     with open('emojipedia.html', 'w') as fp:
         fp.write(r.text)
     results = []
-    for match in re.finditer(LISTING_PATTERN, r.text):
-        groups = match.groups()
-        results.append({'href': groups[0], 'title': groups[1]})
+    for listing_pattern in LISTING_PATTERNS:
+        for match in re.finditer(listing_pattern, r.text):
+            groups = match.groups()
+            results.append({'href': groups[0], 'title': groups[1]})
 
 
     # 2) for each emoji, go to the dedicated emoji page and grab the emoji itself
