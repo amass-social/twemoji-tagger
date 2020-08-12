@@ -1,7 +1,7 @@
 import React from 'react';
 import './EmojiSearch.css';
 
-const emojiList = require('./emojis.json');
+const emojiList = require('./emojis/emoji_definitions.json');
 
 
 class EmojiSearch extends React.Component {
