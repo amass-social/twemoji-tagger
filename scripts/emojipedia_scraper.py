@@ -103,9 +103,9 @@ def main():
         emojis_by_title[base_title][rest_of_title] = emoji_obj
 
 
-    with open('emojis.json', 'w') as fp:
+    with open('emoji_definitions.json', 'w') as fp:
         json.dump(emojis_by_title, fp)
-    print(f'Done scraping and writing {len(results)} emojis ({len(emojis_by_title)} unique) to ./emojis.json')
+    print(f'Done scraping and writing {len(results)} emojis ({len(emojis_by_title)} unique) to ./emoji_definitions.json')
 
 
 
