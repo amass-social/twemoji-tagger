@@ -95,6 +95,7 @@ class CategorizeEmojisTool extends React.Component {
   // this function can handle the following cases:
   //  1) If the emoji is not selected at all -> select it and add it to the currently selected group
   //  2) If the emoji is selected in the currently selected group -> deselect it entirely
+  //  3) if the emoji is selected in a different group -> switch to that group
   // Therefore, if an emoji is selected in a different group, you have to switch to that group and deselect it before selecting it from another group
   onClick_selectEmoji = (emojiId) => {
 
@@ -144,6 +145,10 @@ class CategorizeEmojisTool extends React.Component {
       this.setState({groups: newGroups, usedEmojiIds: newUsedEmojiIds});
       return;
     }
+
+    // case 3) the emoji is selected in a different group -> change state.selectedGroup to point at that group
+    let groupIndex = this.state.usedEmojiIds[emojiId];
+    this.onClick_selectGroup(this.state.groupOrder[groupIndex]);
   }
 
 
