@@ -37,6 +37,8 @@ def main():
 
     # 1) grab a list of links to all the emojis on their index
     r = requests.get(BASE_URL)
+    with open('emojipedia.html', 'w') as fp:
+        fp.write(r.text)
     results = []
     for match in re.finditer(LISTING_PATTERN, r.text):
         groups = match.groups()

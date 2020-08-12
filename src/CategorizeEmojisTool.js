@@ -10,10 +10,11 @@ class CategorizeEmojisTool extends React.Component {
   constructor() {
     super();
     this.state = {
-      groups        : {'group_1': [/* emojiIds */]},
-      groupOrder    : ['group_1'],
-      selectedGroup : 'group_1',
-      usedEmojiIds  : {/* EmojiID -> index of group in state.groupOrder */}
+      groups              : {'group_1': [/* emojiIds */]},
+      groupOrder          : ['group_1'],
+      selectedGroup       : 'group_1',
+      usedEmojiIds        : {/* EmojiID -> index of group in state.groupOrder */},
+      highlightUnselected : false
     }
   }
 
@@ -198,7 +199,12 @@ class CategorizeEmojisTool extends React.Component {
           } else {
             containerCSS = 'emoji-box selected-in-different-group';
           }
+        } else {
+          if (this.state.highlightUnselected) {
+            containerCSS = 'emoji-box unselected';
+          }
         }
+
         emojisToRender.push(
           <div className={containerCSS} onClick={() => this.onClick_selectEmoji(emojiId)}>
             <p className="emoji">{emojiText}</p>
@@ -239,6 +245,9 @@ class CategorizeEmojisTool extends React.Component {
             <button onClick={this.onClick_createNewGroup}>New Group</button>
             <button onClick={this.onClick_copyGroupsToClipboard}>Copy JSON to Clipboard</button>
             <button onClick={this.onClick_loadEmojiCategories}>Load from JSON</button>
+            <button onClick={() => this.setState({highlightUnselected: !this.state.highlightUnselected})}>
+              {(this.state.highlightUnselected === false) ? "Highlight Unselected" : "Turn Highlight Off"}
+            </button>
           </div>
           {this.renderGroups()}
         </div>
