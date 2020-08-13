@@ -6,7 +6,7 @@
 
 #CategorizeEmojisTool #control-panel {
   height: calc(100% - 20px);
-  width: 300px;
+  width: 350px;
   flex-shrink: 0;
   padding: 10px;
   border-right: 1px solid white;
@@ -73,6 +73,16 @@
   background-color: #545c6d;
 }
 
+#CategorizeEmojisTool .group .group-icon {
+  height: 30px;
+  width: 30px;
+  background-color: black;
+  margin-right: 5px;
+  flex-shrink: 0;
+  background-color: #282c34;
+  align-items: center;
+  font-size: 1.5em;
+}
 
 
 #CategorizeEmojisTool #emojis-container {

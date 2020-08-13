@@ -3,18 +3,26 @@ import './CategorizeEmojisTool.css';
 import emoji from 'react-easy-emoji';
 
 
-const EMOJIS = require('./emojis/emoji_definitions.json');
+// Constants -------------------------------------------------------------------
+
+const EMOJIS  = require('./emojis/emoji_definitions.json');
+const DEVMODE = false;
+
+
+// <CategorizeEmojisTool/> -----------------------------------------------------
 
 class CategorizeEmojisTool extends React.Component {
 
   constructor() {
     super();
     this.state = {
-      groups              : {'group_1': [/* emojiIds */]},
-      groupOrder          : ['group_1'],
-      selectedGroup       : 'group_1',
-      usedEmojiIds        : {/* EmojiID -> index of group in state.groupOrder */},
-      highlightUnselected : false
+      groups                    : {'group_1': [/* emojiIds */]},
+      groupOrder                : ['group_1'],
+      selectedGroup             : 'group_1',
+      usedEmojiIds              : {/* EmojiID -> index of group in state.groupOrder */},
+      highlightUnselectedActive : false,
+      groupIcons                : {'group_1': ''},
+      selectGroupIconActive     : false
     }
   }
 
@@ -28,6 +36,17 @@ class CategorizeEmojisTool extends React.Component {
     }
     return undefined;
   }
+
+
+  getEmojiByTitle = (emojiId) => {
+    if (emojiId === '') { return; }
+    if (emojiId in EMOJIS) {
+      if ('emoji' in EMOJIS[emojiId]['default']) {
+        return emoji(EMOJIS[emojiId]['default']['emoji']);
+      }
+    }
+  }
+
 
   // Input ---------------------------------------------------------------------
 
@@ -59,8 +78,22 @@ class CategorizeEmojisTool extends React.Component {
       }
     }
 
+    // update the groupID in state.groupIcons
+    let newGroupIcons = {};
+    for (let groupId in this.state.groupIcons) {
+      if (groupId !== oldName) {
+        newGroupIcons[groupId] = this.state.groupIcons[groupId];
+      }
+    }
+    newGroupIcons[newName] = this.state.groupIcons[oldName];
+
     // save new state
-    this.setState({groups: newGroupsState, selectedGroup: newName, groupOrder: newGroupOrder});
+    this.setState({
+      groups: newGroupsState,
+      selectedGroup: newName,
+      groupOrder: newGroupOrder,
+      groupIcons: newGroupIcons
+    });
   }
 
 
@@ -82,8 +115,17 @@ class CategorizeEmojisTool extends React.Component {
     }
     newGroupOrder.push(newGroupId);
 
+    // add the group to state.groupIcons
+    let newGroupIcons = Object.assign({}, this.state.groupIcons);
+    newGroupIcons[newGroupId] = '';
+
     // update state
-    this.setState({groups: newGroupsState, selectedGroup: newGroupId, groupOrder: newGroupOrder});
+    this.setState({
+      groups: newGroupsState,
+      selectedGroup: newGroupId,
+      groupOrder: newGroupOrder,
+      groupIcons: newGroupIcons
+    });
   }
 
 
@@ -92,13 +134,22 @@ class CategorizeEmojisTool extends React.Component {
   }
 
 
+
+  onClick_selectEmoji = (emojiId) => {
+    if (this.state.selectGroupIconActive) {
+      this.onClick_selectEmojiForGroupIcon(emojiId);
+    } else {
+      this.onClick_selectEmojiIntoGroup(emojiId);
+    }
+  }
+
+
   // this function can handle the following cases:
   //  1) If the emoji is not selected at all -> select it and add it to the currently selected group
   //  2) If the emoji is selected in the currently selected group -> deselect it entirely
   //  3) if the emoji is selected in a different group -> switch to that group
   // Therefore, if an emoji is selected in a different group, you have to switch to that group and deselect it before selecting it from another group
-  onClick_selectEmoji = (emojiId) => {
-
+  onClick_selectEmojiIntoGroup = (emojiId) => {
     // get the index of the currently selected groupID
     let indexOfSelectedGroup = this.getIndexOfSelectedGroup();
 
@@ -152,28 +203,58 @@ class CategorizeEmojisTool extends React.Component {
   }
 
 
+  // this function can handle the following cases:
+  //  1) the icon is currently not a group icon -> set it as the current group's icon
+  //  2) the icon is the current groups icon -> deselect it
+  onClick_selectEmojiForGroupIcon = (emojiId) => {
+
+    // 1) select this emoji
+    if (this.state.groupIcons[this.state.selectedGroup] === '') {
+      let newGroupIcons = Object.assign({}, this.state.groupIcons);
+      newGroupIcons[this.state.selectedGroup] = emojiId;
+      this.setState({groupIcons: newGroupIcons});
+      return;
+    }
+
+    // 2) deselect this emoji
+    if (this.state.groupIcons[this.state.selectedGroup] === emojiId) {
+      let newGroupIcons = Object.assign({}, this.state.groupIcons);
+      newGroupIcons[this.state.selectedGroup] = '';
+      this.setState({groupIcons: newGroupIcons});
+      return;
+    }
+  }
+
+
+
   onClick_copyGroupsToClipboard = () => {
-    navigator.clipboard.writeText(JSON.stringify(this.state.groups));
-    alert('saved');
+    let result = {'groups': this.state.groups, 'groupIcons': this.state.groupIcons};
+    navigator.clipboard.writeText(JSON.stringify(result));
+    alert('saved to clipboard');
   }
 
 
   // this function will load an existing session from emojis/emoji/categories.json
   onClick_loadEmojiCategories = () => {
     let loaded = require('./emojis/emoji_categories.json');
+    //console.log(Object.keys(loaded));
+    let loadedGroups = loaded['groups'];
+    let loadedIcons  = loaded['groupIcons'];
+
     let groups = {};
     let groupOrder = [];
     let selectedGroup = '';
     let usedEmojiIds = {};
+    let groupIcons = Object.assign({}, loadedIcons);
 
-    let sortedGroupNames = Object.keys(loaded).sort();
+    let sortedGroupNames = Object.keys(loadedGroups).sort();
     selectedGroup = sortedGroupNames[0];
     for (let i = 0; i < sortedGroupNames.length; i++) {
       let groupId = sortedGroupNames[i];
       groupOrder.push(groupId)
-      groups[groupId] = loaded[groupId];
-      for (let j = 0; j < loaded[groupId].length; j++) {
-        let emojiId = loaded[groupId][j];
+      groups[groupId] = loadedGroups[groupId];
+      for (let j = 0; j < loadedGroups[groupId].length; j++) {
+        let emojiId = loadedGroups[groupId][j];
         usedEmojiIds[emojiId] = i;
       }
     }
@@ -182,10 +263,15 @@ class CategorizeEmojisTool extends React.Component {
       groups        : groups,
       groupOrder    : groupOrder,
       selectedGroup : selectedGroup,
-      usedEmojiIds  : usedEmojiIds
+      usedEmojiIds  : usedEmojiIds,
+      groupIcons    : groupIcons
     });
   }
 
+
+  onClick_activateSelectGroupIcon = () => {
+    this.setState({selectGroupIconActive: !this.state.selectGroupIconActive});
+  }
 
   // Render --------------------------------------------------------------------
 
@@ -198,7 +284,9 @@ class CategorizeEmojisTool extends React.Component {
       let numEmojiVersions = Object.keys(EMOJIS[emojiId]).length
       if (emojiObj !== undefined && 'emoji' in emojiObj) {
         let emojiText = emoji(`${emojiObj['emoji']}`);
-        // emojiText = '.'; // <- for placeholder during development
+        if (DEVMODE === true) {
+          emojiText = '.'; // <- for placeholder during development
+        }
         let containerCSS = 'emoji-box';
         if (emojiId in this.state.usedEmojiIds ) {
           if (this.state.usedEmojiIds[emojiId] === indexOfSelectedGroup) {
@@ -207,7 +295,7 @@ class CategorizeEmojisTool extends React.Component {
             containerCSS = 'emoji-box selected-in-different-group';
           }
         } else {
-          if (this.state.highlightUnselected) {
+          if (this.state.highlightUnselectedActive) {
             containerCSS = 'emoji-box unselected';
           }
         }
@@ -234,6 +322,7 @@ class CategorizeEmojisTool extends React.Component {
       let groupCSS = (this.state.selectedGroup === groupId) ? "group selected" : "group";
       groupsToRender.push(
         <div className={groupCSS} onClick={() => this.onClick_selectGroup(groupId)}>
+          <div className="group-icon">{this.getEmojiByTitle(this.state.groupIcons[groupId])}</div>
           <input value={groupId} onChange={(e) => this.onInput_changeGroupName(e, groupId)}/>
           <p>{Object.keys(group).length}</p>
         </div>
@@ -256,8 +345,11 @@ class CategorizeEmojisTool extends React.Component {
             <button onClick={this.onClick_createNewGroup}>New Group</button>
             <button onClick={this.onClick_copyGroupsToClipboard}>Copy JSON to Clipboard</button>
             <button onClick={this.onClick_loadEmojiCategories}>Load from JSON</button>
-            <button onClick={() => this.setState({highlightUnselected: !this.state.highlightUnselected})}>
-              {(this.state.highlightUnselected === false) ? "Highlight Unselected" : "Turn Highlight Off"}
+            <button onClick={() => this.setState({highlightUnselectedActive: !this.state.highlightUnselectedActive})}>
+              {(this.state.highlightUnselectedActive === false) ? "Highlight Unselected" : "Turn Highlight Off"}
+            </button>
+            <button onClick={this.onClick_activateSelectGroupIcon}>
+              {(this.state.selectGroupIconActive === false) ? "Select Group Icons" : "Select Emojis"}
             </button>
           </div>
           {this.renderGroups()}
