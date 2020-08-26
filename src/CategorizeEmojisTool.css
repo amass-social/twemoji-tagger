@@ -22,6 +22,13 @@
   margin: 10px 0px;
 }
 
+#CategorizeEmojisTool #title-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 #CategorizeEmojisTool button {
   width: 100%;
   height: 40px;
@@ -34,6 +41,17 @@
 
 #CategorizeEmojisTool button:hover {
   background-color: #3c424f;
+}
+
+#CategorizeEmojisTool #save-buttons-container {
+  display: flex;
+}
+
+#CategorizeEmojisTool button.save-button {
+  flex-shrink: 1;
+  flex-grow: 0;
+  width: 80px;
+  margin: 0px 5px;
 }
 
 #CategorizeEmojisTool input {

@@ -2,6 +2,9 @@ import React from 'react';
 import './CategorizeEmojisTool.css';
 import emoji from 'react-easy-emoji';
 
+// Imports ---------------------------------------------------------------------
+
+import Files from 'react-files';
 
 // Constants -------------------------------------------------------------------
 
@@ -15,6 +18,13 @@ class CategorizeEmojisTool extends React.Component {
 
   constructor() {
     super();
+
+    this.fileReader = new FileReader();
+    this.fileReader.onload = (event) => {
+      this.onClick_loadEmojiCategories(JSON.parse(event.target.result));
+    }
+
+
     this.state = {
       groups                    : {'group_1': [/* emojiIds */]},
       groupOrder                : ['group_1'],
@@ -226,18 +236,8 @@ class CategorizeEmojisTool extends React.Component {
   }
 
 
-
-  onClick_copyGroupsToClipboard = () => {
-    let result = {'groups': this.state.groups, 'groupIcons': this.state.groupIcons};
-    navigator.clipboard.writeText(JSON.stringify(result));
-    alert('saved to clipboard');
-  }
-
-
   // this function will load an existing session from emojis/emoji/categories.json
-  onClick_loadEmojiCategories = () => {
-    let loaded = require('./emojis/emoji_categories.json');
-    //console.log(Object.keys(loaded));
+  onClick_loadEmojiCategories = (loaded) => {
     let loadedGroups = loaded['groups'];
     let loadedIcons  = loaded['groupIcons'];
 
@@ -337,14 +337,32 @@ class CategorizeEmojisTool extends React.Component {
 
 
   render() {
+
+    // when the user clicks "save", this is the JSON object that gets downloaded
+    let saveObject = {'groups': this.state.groups, 'groupIcons': this.state.groupIcons};
+    let encodedSaveObject = `data:text/json;charset=utf-8,${JSON.stringify(saveObject)}`;
+
     return(
       <div id="CategorizeEmojisTool">
         <div id="control-panel">
-          <h1>Groups</h1>
+          <div id="title-row">
+            <h1>Groups</h1>
+            <div id="save-buttons-container">
+              <Files
+                onChange={(file) => this.fileReader.readAsText(file[0])}
+                onError={(err) => console.log(err)}
+                accepts={[".json"]}
+                clickable
+                >
+                <button className="save-button">load</button>
+              </Files>
+              <a href={encodedSaveObject} download="emoji-categories.json">
+                <button className="save-button">save</button>
+              </a>
+            </div>
+          </div>
           <div id="buttons-group">
             <button onClick={this.onClick_createNewGroup}>New Group</button>
-            <button onClick={this.onClick_copyGroupsToClipboard}>Copy JSON to Clipboard</button>
-            <button onClick={this.onClick_loadEmojiCategories}>Load from JSON</button>
             <button onClick={() => this.setState({highlightUnselectedActive: !this.state.highlightUnselectedActive})}>
               {(this.state.highlightUnselectedActive === false) ? "Highlight Unselected" : "Turn Highlight Off"}
             </button>
